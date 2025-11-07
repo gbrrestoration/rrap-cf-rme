@@ -11,7 +11,7 @@ The RME library, accompanying dataset, and RME documentation has to be requested
 
 # Docker ReefModEngine.jl Engine
 
-Ensure your RME is installed at rme_ml inside this directory. 
+Ensure your RME is installed at rme_ml inside this directory. See [here](https://open-aims.github.io/ReefModEngine.jl/v1.4.1/getting_started#Pre-initialization-setup)
 Configure target locations in target_locations.csv or leave as the two minimal examples provided.
 run_example.jl has the example script.
 
