@@ -1,3 +1,6 @@
+# Source
+Copied with build / docker added from https://github.com/open-AIMS/ReefModEngine.jl
+
 # ReefModEngine.jl
 
 A Julia interface to the ReefMod Engine (RME) C++ API.
