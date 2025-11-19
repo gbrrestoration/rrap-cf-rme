@@ -1,20 +1,66 @@
 using ReefModEngine
 using CSV, DataFrames
 
-# Initialize RME (may take a minute or two)
-init_rme("rme_ml") # TODO fill in path
+#! ENV with Defaults 
+thread_count = parse(Int, get(ENV, "THREAD_COUNT", "2"))
+# Turn on use of a fixed seed value
+use_fixed_seed = parse(Int, get(ENV, "USE_FIXED_SEED", "1"))
+# Set the fixed seed value
+fixed_seed = parse(Float64, get(ENV, "FIXED_SEED", "123.0"))
+#! Non default ENV vars
+rme_path = get(ENV, "RME_PATH", nothing)
+target_locations_path = get(ENV, "TARGET_LOCATIONS_PATH", nothing)
+# Name to associate with this set of runs
+name = get(ENV, "RUN_NAME", nothing)
+start_year = parse(Int, get(ENV, "START_YEAR", nothing))
+end_year = parse(Int, get(ENV, "END_YEAR", nothing))
+# RCP/SSP scenario to use
+RCP_scen = get(ENV, "RCP_SCEN", nothing)
+# The base Global Climate Model (GCM)
+gcm = get(ENV, "GCM", nothing)
+# Number of repeats: number of random environmental sequences to run
+reps = parse(Int, get(ENV, "REPS", nothing))  
+# Define coral outplanting density (per m²)
+d_density_m² = parse(Float64, get(ENV, "D_DENSITY_M2", "6.8"))  # e.g., 1.0 coral per m²
+
+if isnothing(rme_path)
+    error("RME_PATH environment variable not set. Please set it to the location of the ReefMod Engine data files.")
+end
+if isnothing(target_locations_path)
+    error("TARGET_LOCATIONS_PATH environment variable not set. Please set it to the location of the target locations CSV file.")
+end
+if isnothing(name)
+    error("RUN_NAME environment variable not set. Please set it to the desired name for this run.")
+end
+if isnothing(start_year)
+    error("START_YEAR environment variable not set. Please set it to the desired start year for this run.")
+end
+if isnothing(end_year)
+    error("END_YEAR environment variable not set. Please set it to the desired end year for this run.")
+end
+if isnothing(RCP_scen)
+    error("RCP_SCEN environment variable not set. Please set it to the desired RCP/SSP scenario for this run.")
+end
+if isnothing(gcm)
+    error("GCM environment variable not set. Please set it to the desired Global Climate Model for this run.")
+end
+if isnothing(reps)
+    error("REPS environment variable not set. Please set it to the desired number of repeats for this run.")
+end
+
+init_rme(rme_path) # TODO fill in path
 # [ Info: Loaded RME 1.0.28
 
-set_option("thread_count", 2)  # Set to use two threads # TODO, set threads. seems not to go past 2 on my 4 core machine. 
-set_option("use_fixed_seed", 1)  # Turn on use of a fixed seed value
-set_option("fixed_seed", 123.0)  # Set the fixed seed value
+set_option("thread_count", thread_count) #! set threads. seems not to go past 2 on my 4 core machine. 
+set_option("use_fixed_seed", use_fixed_seed)  
+set_option("fixed_seed", fixed_seed)  
 
 # Load target intervention locations determined somehow (e.g., by ADRIA)
 # The first column is simply the row number.
 # The second column is a list of target reef ids matching the format as found in
 # the id list file (the file is found under `data_files/id` of the RME data set)
 deploy_loc_details = CSV.read(
-    "./target_locations.csv",
+    target_locations_path,
     DataFrame,
     header=["index_id", "reef_id"],
     types=Dict(1=>Int64, 2=>String)  # Force values to be interpreted as expected types
@@ -28,12 +74,14 @@ n_target_reefs = length(target_reef_idx)
 # Get list of reef ids as specified by ReefMod Engine
 reef_id_list = reef_ids()
 
-name = "Example"       # Name to associate with this set of runs
-start_year = 2022
-end_year = 2099
-RCP_scen = "SSP 2.45"  # RCP/SSP scenario to use
-gcm = "CNRM_ESM2_1"    # The base Global Climate Model (GCM)
-reps = 1               # Number of repeats: number of random environmental sequences to run # TODO, small for testing
+#* Moved to top
+# name = "Example"       
+# start_year = 2022
+# end_year = 2030
+# RCP_scen = "SSP 2.45"  
+# gcm = "CNRM_ESM2_1"    
+# reps = 1                # TODO, small for testing
+
 n_reefs = length(reef_id_list)
 
 # Get reef areas from RME
@@ -42,8 +90,6 @@ reef_area_km² = reef_areas()
 # Get list of areas for the target reefs
 target_reef_areas_km² = reef_areas(target_reef_ids)
 
-# Define coral outplanting density (per m²)
-d_density_m² = 6.8
 
 # Initialize result store
 result_store = ResultStore(start_year, end_year)

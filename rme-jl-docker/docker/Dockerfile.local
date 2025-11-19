@@ -6,8 +6,8 @@ WORKDIR /app
 COPY ./src /app/src
 COPY ./Manifest.toml /app/
 COPY ./Project.toml /app/
-# # The RME src will use. # going in efs mount
-# COPY ./rme_ml /app/rme_ml
+# The RME src will use.
+COPY ./rme /app/rme
 
 # Initialize Julia environment, install dependencies, and precompile
 RUN julia -t auto --project=. -e "using Pkg; Pkg.instantiate(); using ReefModEngine; Pkg.precompile();"
