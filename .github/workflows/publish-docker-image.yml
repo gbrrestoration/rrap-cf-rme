@@ -59,7 +59,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./rme-jl-docker
           file: ./docker/Dockerfile
           push: true # Pushes the image to the registry
           tags: ${{ steps.meta.outputs.tags }} # Uses the tags generated in the metadata step
