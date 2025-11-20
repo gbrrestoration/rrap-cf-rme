@@ -11,11 +11,5 @@ if [ ! -d $RME_PATH ]; then
 fi
 
 
-
-echo "✓ All required volume mounts validated"
-echo "  - Script: /app/run_script.jl"
-echo "  - Data: /app/target_locations.csv"
-echo "  - Output: /app/outputs"
-
 # If all checks pass, execute the provided command
 exec "$@"

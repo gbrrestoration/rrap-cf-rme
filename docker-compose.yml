@@ -19,5 +19,5 @@ services:
       REPS: "1"  # number of repeats
 
     volumes:
-      - ./rme:/app/rme2
-      - ./example_outs:/app/outputs2  # this must match location in run_example.jl
+      - ./rme:/app/rme
+      - ./example_outs:/app/outputs  # this must match location in run_example.jl
