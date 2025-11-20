@@ -6,6 +6,8 @@ WORKDIR /app
 COPY ./src /app/src
 COPY ./Manifest.toml /app/
 COPY ./Project.toml /app/
+COPY ./target_locations /app/target_locations
+COPY ./run_script.jl /app/run_script.jl
 # # The RME src will use. # going in efs mount
 # COPY ./rme_ml /app/rme_ml
 

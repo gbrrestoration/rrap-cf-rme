@@ -4,12 +4,13 @@ services:
     build: 
       context: .
       dockerfile: ./docker/Dockerfile.local
-      no_cache: false #true
+      no_cache: true #true
     container_name: reefmodengine_runner
     environment:
       THREAD_COUNT: "2"  # number of parallel threads
       RME_PATH: "rme"
-      TARGET_LOCATIONS_PATH: "./target_locations.csv"
+      
+      TARGET_LOCATIONS_PATH: "SMALL"
       
       RUN_NAME: "Example"
       START_YEAR: "2022"
@@ -20,11 +21,11 @@ services:
 
     volumes:
       # Set thread_count, start + end year, RCP/SSP (one), GCM (one), repeats for random environmental sequences, coral outplanting density
-      - ./run_example.jl:/app/run_script.jl
+      # - ./run_example.jl:/app/run_script.jl
       # Load target intervention locations determined somehow (e.g., by ADRIA)
       # The first column is simply the row number.
       # The second column is a list of target reef ids matching the format as found in
       # the id list file (the file is found under `data_files/id` of the RME data set
-      - ./target_locations.csv:/app/target_locations.csv  # this must match location in run_example.jl
+      # - ./target_locations.csv:/app/target_locations.csv  # this must match location in run_example.jl
 
       - ./example_outs:/app/outputs  # this must match location in run_example.jl

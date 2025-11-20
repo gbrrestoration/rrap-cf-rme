@@ -1,15 +1,22 @@
+# Adapted from https://open-aims.github.io/ReefModEngine.jl/v1.4.1/getting_started#Example-usage
 using ReefModEngine
 using CSV, DataFrames
 
 #! ENV with Defaults 
-thread_count = parse(Int, get(ENV, "THREAD_COUNT", "2"))
+
+thread_count = parse(Int, get(ENV, "THREAD_COUNT", "2"))  #* For ECS, set in cdk (others to set in DAG) https://github.com/gbrrestoration/rrap-cf-aws-infra/blob/main/lib/rrap-cf-airflow-stack.ts
 # Turn on use of a fixed seed value
 use_fixed_seed = parse(Int, get(ENV, "USE_FIXED_SEED", "1"))
 # Set the fixed seed value
 fixed_seed = parse(Float64, get(ENV, "FIXED_SEED", "123.0"))
+# Define coral outplanting density (per m²)
+d_density_m² = parse(Float64, get(ENV, "D_DENSITY_M2", "6.8"))  # e.g., 1.0 coral per m²
+
 #! Non default ENV vars
-rme_path = get(ENV, "RME_PATH", nothing)
-target_locations_path = get(ENV, "TARGET_LOCATIONS_PATH", nothing)
+# Path to RME installation 
+rme_path = get(ENV, "RME_PATH", nothing)  #* For ECS, set in cdk (others to set in DAG) https://github.com/gbrrestoration/rrap-cf-aws-infra/blob/main/lib/rrap-cf-airflow-stack.ts
+# target_locations_path = get(ENV, "TARGET_LOCATIONS_PATH", nothing)
+target_locations_mode = get(ENV, "TARGET", "default") # one of ["FULL", "MEDIUM", "SMALL"]
 # Name to associate with this set of runs
 name = get(ENV, "RUN_NAME", nothing)
 start_year = parse(Int, get(ENV, "START_YEAR", nothing))
@@ -20,15 +27,26 @@ RCP_scen = get(ENV, "RCP_SCEN", nothing)
 gcm = get(ENV, "GCM", nothing)
 # Number of repeats: number of random environmental sequences to run
 reps = parse(Int, get(ENV, "REPS", nothing))  
-# Define coral outplanting density (per m²)
-d_density_m² = parse(Float64, get(ENV, "D_DENSITY_M2", "6.8"))  # e.g., 1.0 coral per m²
+
+
 
 if isnothing(rme_path)
     error("RME_PATH environment variable not set. Please set it to the location of the ReefMod Engine data files.")
 end
-if isnothing(target_locations_path)
-    error("TARGET_LOCATIONS_PATH environment variable not set. Please set it to the location of the target locations CSV file.")
+# if isnothing(target_locations_path)
+#     error("TARGET_LOCATIONS_PATH environment variable not set. Please set it to the location of the target locations CSV file.")
+# end
+# Asert target locations set properly and then set path
+if target_locations_mode == "FULL"
+    target_locations_path = "./target_locations/target_locations_full.csv"
+elseif target_locations_mode == "MEDIUM"
+    target_locations_path = "./target_locations/target_locations_medium.csv"
+elseif target_locations_mode == "SMALL"
+    target_locations_path = "./target_locations/target_locations_small.csv"
+else
+    error("TARGET environment variable set to invalid value. Please set it to one of: FULL, MEDIUM, SMALL.")
 end
+
 if isnothing(name)
     error("RUN_NAME environment variable not set. Please set it to the desired name for this run.")
 end
