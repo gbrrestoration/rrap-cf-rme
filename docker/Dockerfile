@@ -8,8 +8,6 @@ COPY ./Manifest.toml /app/
 COPY ./Project.toml /app/
 COPY ./target_locations /app/target_locations
 COPY ./run_script.jl /app/run_script.jl
-# # The RME src will use. # going in efs mount
-# COPY ./rme_ml /app/rme_ml
 
 # Initialize Julia environment, install dependencies, and precompile
 RUN julia -t auto --project=. -e "using Pkg; Pkg.instantiate(); using ReefModEngine; Pkg.precompile();"
@@ -17,6 +15,10 @@ RUN julia -t auto --project=. -e "using Pkg; Pkg.instantiate(); using ReefModEng
 # Copy entrypoint script
 COPY ./docker/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Environment variables for mount paths expected to be fulfilled at runtime. Overridable.
+ENV RME_PATH="/app/rme"
+ENV OUTPUTS_PATH="/app/outputs"
 
 # Set entrypoint to validate mounts, then run Julia
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "julia", "--project=.", "-t", "auto"]

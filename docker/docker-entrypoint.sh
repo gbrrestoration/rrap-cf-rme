@@ -1,24 +1,18 @@
 #!/bin/bash
 set -e
 
-# Check if required volume mounts exist
-if [ ! -f "/app/run_script.jl" ]; then
-    echo "ERROR: Script file mount is required but not found at: /app/run_script.jl"
-    echo "Usage: docker run -v /path/to/your_script.jl:/app/run_script.jl ..."
+if [ ! -d $OUTPUTS_PATH ]; then
+    echo "ERROR: Output directory mount is required but not found at: $OUTPUTS_PATH. Customise this path with the OUTPUTS_PATH environment variable."
     exit 1
 fi
 
-if [ ! -f "/app/target_locations.csv" ]; then
-    echo "ERROR: Data file mount is required but not found at: /app/target_locations.csv"
-    echo "Usage: docker run -v /path/to/target_locations.csv:/app/target_locations.csv ..."
+if [ ! -d $RME_PATH ]; then
+    echo "ERROR: RME directory mount is required but not found at: $RME_PATH. Customise this path with the RME_PATH environment variable."
+    echo "IMPORTANT NOTE : This RME must have the reefmod_gbr.gpkg inside /path/to/rme/data_files/region. See step 1 of https://open-aims.github.io/ReefModEngine.jl/v1.4.1/getting_started#Pre-initialization-setup. Step 2 is not required in this image."
     exit 1
 fi
 
-if [ ! -d "/app/outputs" ]; then
-    echo "ERROR: Output directory mount is required but not found at: /app/outputs"
-    echo "Usage: docker run -v /path/to/outputs:/app/outputs ..."
-    exit 1
-fi
+
 
 echo "✓ All required volume mounts validated"
 echo "  - Script: /app/run_script.jl"

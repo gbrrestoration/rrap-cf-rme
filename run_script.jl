@@ -2,8 +2,17 @@
 using ReefModEngine
 using CSV, DataFrames
 
-#! ENV with Defaults 
+#* Mount paths: These 2 are checked in entrypoint and have defaults in the image build. They can be overriden in CDK config.
+rme_path = get(ENV, "RME_PATH", nothing)
+outputs_path = get(ENV, "OUTPUTS_PATH", nothing)
+if isnothing(rme_path)
+    error("RME_PATH environment variable not set. Please set it to the location of the ReefMod Engine data files.")
+end
+if isnothing(outputs_path)
+    error("OUTPUTS_PATH environment variable not set. Please set it to the desired output directory for this run.")
+end
 
+#* ENV with Defaults 
 thread_count = parse(Int, get(ENV, "THREAD_COUNT", "2"))  #* For ECS, set in cdk (others to set in DAG) https://github.com/gbrrestoration/rrap-cf-aws-infra/blob/main/lib/rrap-cf-airflow-stack.ts
 # Turn on use of a fixed seed value
 use_fixed_seed = parse(Int, get(ENV, "USE_FIXED_SEED", "1"))
@@ -12,10 +21,7 @@ fixed_seed = parse(Float64, get(ENV, "FIXED_SEED", "123.0"))
 # Define coral outplanting density (per m²)
 d_density_m² = parse(Float64, get(ENV, "D_DENSITY_M2", "6.8"))  # e.g., 1.0 coral per m²
 
-#! Non default ENV vars
-# Path to RME installation 
-rme_path = get(ENV, "RME_PATH", nothing)  #* For ECS, set in cdk (others to set in DAG) https://github.com/gbrrestoration/rrap-cf-aws-infra/blob/main/lib/rrap-cf-airflow-stack.ts
-# target_locations_path = get(ENV, "TARGET_LOCATIONS_PATH", nothing)
+#* Non default ENV vars
 target_locations_mode = get(ENV, "TARGET", "default") # one of ["FULL", "MEDIUM", "SMALL"]
 # Name to associate with this set of runs
 name = get(ENV, "RUN_NAME", nothing)
@@ -30,9 +36,9 @@ reps = parse(Int, get(ENV, "REPS", nothing))
 
 
 
-if isnothing(rme_path)
-    error("RME_PATH environment variable not set. Please set it to the location of the ReefMod Engine data files.")
-end
+# if isnothing(rme_path)
+    # error("RME_PATH environment variable not set. Please set it to the location of the ReefMod Engine data files.")
+# end
 # if isnothing(target_locations_path)
 #     error("TARGET_LOCATIONS_PATH environment variable not set. Please set it to the location of the target locations CSV file.")
 # end
@@ -66,8 +72,9 @@ if isnothing(reps)
     error("REPS environment variable not set. Please set it to the desired number of repeats for this run.")
 end
 
-init_rme(rme_path) # TODO fill in path
-# [ Info: Loaded RME 1.0.28
+
+
+init_rme(rme_path)
 
 set_option("thread_count", thread_count) #! set threads. seems not to go past 2 on my 4 core machine. 
 set_option("use_fixed_seed", use_fixed_seed)  
@@ -150,4 +157,4 @@ run_init()
 concat_results!(result_store, start_year, end_year, reps)
 
 #TODO - added save function   
-save_result_store("./outputs", result_store)
+save_result_store(outputs_path, result_store)

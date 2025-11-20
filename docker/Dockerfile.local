@@ -6,8 +6,8 @@ WORKDIR /app
 COPY ./src /app/src
 COPY ./Manifest.toml /app/
 COPY ./Project.toml /app/
-# The RME src will use.
-COPY ./rme /app/rme
+COPY ./target_locations /app/target_locations
+COPY ./run_script.jl /app/run_script.jl
 
 # Initialize Julia environment, install dependencies, and precompile
 RUN julia -t auto --project=. -e "using Pkg; Pkg.instantiate(); using ReefModEngine; Pkg.precompile();"
