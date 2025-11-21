@@ -2,6 +2,9 @@ FROM julia:1.12.1
 
 WORKDIR /app
 
+# Try to coerce Julia to build across multiple targets
+ENV JULIA_CPU_TARGET=x86_64;haswell;skylake;skylake-avx512;tigerlake
+
 # Copy project files for dependency installation
 COPY ./src /app/src
 COPY ./Manifest.toml /app/Manifest.toml
@@ -21,7 +24,7 @@ ENV RME_PATH="/app/rme"
 ENV OUTPUTS_PATH="/app/outputs"
 
 # Set entrypoint to validate mounts, then run Julia
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "julia", "--project=/app", "-t", "auto"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "julia", "--project=.", "-t", "auto"]
 
 # Default: run script at the configured path (can be overridden)
 CMD ["/app/run_script.jl"]
