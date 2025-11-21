@@ -2,6 +2,7 @@ FROM julia:1.12.1
 
 WORKDIR /app
 
+# disable locally for speed.
 # Try to coerce Julia to build across multiple targets
 # ENV JULIA_CPU_TARGET=x86_64;haswell;skylake;skylake-avx512;tigerlake
 
