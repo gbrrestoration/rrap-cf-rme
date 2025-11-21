@@ -20,6 +20,8 @@ use_fixed_seed = parse(Int, get(ENV, "USE_FIXED_SEED", "1"))
 fixed_seed = parse(Float64, get(ENV, "FIXED_SEED", "123.0"))
 # Define coral outplanting density (per m²)
 d_density_m² = parse(Float64, get(ENV, "D_DENSITY_M2", "6.8"))  # e.g., 1.0 coral per m²
+# optional run ID. default to 0
+run_id = get(ENV, "RUN_ID", "0")
 
 #* Non default ENV vars
 target_locations_mode = get(ENV, "TARGET", "default") # one of ["FULL", "MEDIUM", "SMALL"]
@@ -156,5 +158,4 @@ run_init()
 # Collect and store results
 concat_results!(result_store, start_year, end_year, reps)
 
-#TODO - save in a sub dir of outputs_path with uuid/workflow_id from env var injected from DAG or otherwise randomly generated   
-save_result_store(outputs_path, result_store)
+save_result_store(joinpath(outputs_path, run_id), result_store)
