@@ -1,14 +1,15 @@
 
 services:
   reefmodengine_runner:
-    build: 
-      context: .
-      dockerfile: ./docker/Dockerfile
-      no_cache: false #true
+    image: ghcr.io/gbrrestoration/rrap-cf-rme/rrap-cf-rme:sha-2e54473
+    # build: 
+    #   context: .
+    #   dockerfile: ./docker/Dockerfile
+    #   no_cache: false #true
     container_name: reefmodengine_runner
     environment:
-      # RME_PATH: "/app/rme"  # path inside container where RME data files are mounted
-      # OUTPUTS_PATH: "/app/outputs"  # path inside container where outputs are mounted
+      RME_PATH: "/shared/rme"  # path inside container where RME data files are mounted
+      OUTPUTS_PATH: "/shared/outputs"  # path inside container where outputs are mounted
 
       TARGET: "MEDIUM"
       RUN_NAME: "Example"
@@ -19,5 +20,5 @@ services:
       REPS: "1"  # number of repeats
 
     volumes:
-      - ./rme:/app/rme
-      - ./example_outs:/app/outputs  # this must match location in run_example.jl
+      - ./rme:/shared/rme
+      - ./example_outs:/shared/outputs  # this must match location in run_example.jl

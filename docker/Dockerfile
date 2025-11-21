@@ -4,8 +4,8 @@ WORKDIR /app
 
 # Copy project files for dependency installation
 COPY ./src /app/src
-COPY ./Manifest.toml /app/
-COPY ./Project.toml /app/
+COPY ./Manifest.toml /app/Manifest.toml
+COPY ./Project.toml /app/Project.toml
 COPY ./target_locations /app/target_locations
 COPY ./run_script.jl /app/run_script.jl
 
@@ -21,7 +21,7 @@ ENV RME_PATH="/app/rme"
 ENV OUTPUTS_PATH="/app/outputs"
 
 # Set entrypoint to validate mounts, then run Julia
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "julia", "--project=.", "-t", "auto"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "julia", "--project=/app", "-t", "auto"]
 
 # Default: run script at the configured path (can be overridden)
 CMD ["/app/run_script.jl"]
