@@ -14,7 +14,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}/rrap-cf-rme
-  JULIA_VERSION: 1.12
+  JULIA_VERSION: 1.11
 
 jobs:
   build-and-push-image:

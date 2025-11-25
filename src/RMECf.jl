@@ -145,7 +145,7 @@ function run()
 
 	# Note: if the Julia runtime crashes, check that the specified data file location is correct
 	@info "runCreate"
-	ReefModeEngine.@RME runCreate(name::Cstring, start_year::Cint, end_year::Cint, RCP_scen::Cstring, gcm::Cstring, reps::Cint)::Cint
+	ReefModEngine.@RME runCreate(name::Cstring, start_year::Cint, end_year::Cint, RCP_scen::Cstring, gcm::Cstring, reps::Cint)::Cint
 
 	# TODO, online page is out of date so this was commented. see getting_start.md in this repo which is more recent than the online doc.
 	# Adding dhw tolerance was removed in v1.0.31
