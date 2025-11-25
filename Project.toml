@@ -4,13 +4,21 @@ authors = ["Peter Baker <peter.baker122@csiro.au>"]
 version = "0.1.0"
 
 [deps]
+AWS = "fbe9abb3-538b-5e4e-ba9e-bc94f4f92ebc"
+AWSS3 = "1c724243-ef5b-51ab-93f4-b0a88ac62a95"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DotEnv = "4dc1fcf4-5e3b-5448-94ab-0c38ec0385c1"
+OpenSSL = "4d8831e6-92b7-49fb-bdf8-b643e874388c"
+OpenSSL_jll = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
 ReefModEngine = "f4ffb74a-bba7-4ac3-ad08-f8621d7c6d1d"
 
 [compat]
+AWS = "^1"
+AWSS3 = "^0"
 CSV = "0.10.15"
 DataFrames = "1.8.1"
 DotEnv = "1.0.0"
+OpenSSL = "1.5.0"
+OpenSSL_jll = "3.5.0"
 ReefModEngine = "1.5.0"

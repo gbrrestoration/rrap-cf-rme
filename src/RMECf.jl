@@ -3,6 +3,10 @@ module RMECf
 # Adapted from https://open-aims.github.io/ReefModEngine.jl/v1.4.1/getting_started#Example-usage
 using ReefModEngine
 using CSV, DataFrames
+using AWS, AWSS3
+
+include("types.jl")
+include("storage_client.jl")
 
 export run
 
@@ -33,11 +37,16 @@ function run()
 	# Mount paths: These 2 are checked in entrypoint and have defaults in the image build. They can be overriden in CDK config.
 	rme_path = get(ENV, "RME_PATH", nothing)
 	outputs_path = get(ENV, "OUTPUTS_PATH", nothing)
+    s3_storage_path = get(ENV, "S3_STORAGE_PATH", nothing)
+
 	if isnothing(rme_path)
 		error("RME_PATH environment variable not set. Please set it to the location of the ReefMod Engine data files.")
 	end
 	if isnothing(outputs_path)
 		error("OUTPUTS_PATH environment variable not set. Please set it to the desired output directory for this run.")
+	end
+	if isnothing(s3_storage_path)
+		error("S3_STORAGE_PATH environment variable not set. Please set it to the desired output directory in S3 for this run. Format: s3://bucket-name1234/output/path")
 	end
 
 	# ENV with Defaults 
@@ -101,6 +110,14 @@ function run()
 	if isnothing(reps)
 		error("REPS environment variable not set. Please set it to the desired number of repeats for this run.")
 	end
+
+    # Get AWS region with default and warning
+    aws_region = get(ENV, "AWS_REGION", "ap-southeast-2")
+
+    # instantiate S3 storage client
+    storage_client = S3StorageClient(;
+        region=aws_region
+    )
 
 	init_rme(rme_path)
 
@@ -184,7 +201,12 @@ function run()
 	@info "Concatenating results"
 	concat_results!(result_store, start_year, end_year, reps)
 
-	save_result_store(joinpath(outputs_path, run_id), result_store)
+    dir = joinpath(outputs_path, run_id)
+    @info "Saving results to" dir
+	save_result_store(dir, result_store)
+    # Uploading to S3
+    @info "Uploading results to S3 at" dir s3_storage_path
+    upload_directory(storage_client, dir, s3_storage_path)
 end
 
 end
