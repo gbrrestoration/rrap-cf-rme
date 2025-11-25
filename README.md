@@ -1,17 +1,3 @@
-# Source
-Copied with build / docker added from https://github.com/open-AIMS/ReefModEngine.jl
-
-# ReefModEngine.jl
-
-A Julia interface to the ReefMod Engine (RME) C++ API.
-
-[![Documentation](https://img.shields.io/badge/docs-stable-blue)](https://open-aims.github.io/ReefModEngine.jl/stable/) [![Documentation](https://img.shields.io/badge/docs-dev-blue)](https://open-aims.github.io/ReefModEngine.jl/dev/)
-
-Targets RME v1.0, and provides some convenience functions for outplanting interventions.
-All other functions are accessible via the `@RME` macro.
-
-The RME library, accompanying dataset, and RME documentation has to be requested from RME developers.
-
 # Docker ReefModEngine.jl Engine
 
 Ensure your RME is installed at rme_ml inside this directory. See [here](https://open-aims.github.io/ReefModEngine.jl/v1.4.1/getting_started#Pre-initialization-setup)

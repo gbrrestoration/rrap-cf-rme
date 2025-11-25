@@ -10,10 +10,13 @@ COPY ./src /app/src
 COPY ./Manifest.toml /app/Manifest.toml
 COPY ./Project.toml /app/Project.toml
 COPY ./target_locations /app/target_locations
-COPY ./run_script.jl /app/run_script.jl
+
+# ReefModEngine.jl is not on Julia registry, requiring this step
+RUN julia --project=@app \
+    -e 'using Pkg; Pkg.add(url="https://github.com/open-AIMS/ReefModEngine.jl", rev="main");'
 
 # Initialize Julia environment, install dependencies, and precompile
-RUN julia -t auto --project=. -e "using Pkg; Pkg.instantiate(); using ReefModEngine; Pkg.precompile();"
+RUN julia -t auto --project=. -e "using Pkg; Pkg.instantiate(); using RMECf; Pkg.precompile();"
 
 # Copy entrypoint script
 COPY ./docker/docker-entrypoint.sh /usr/local/bin/
@@ -24,7 +27,7 @@ ENV RME_PATH="/app/rme"
 ENV OUTPUTS_PATH="/app/outputs"
 
 # Set entrypoint to validate mounts, then run Julia
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "julia", "--project=.", "-t", "auto"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "julia", "--project=.", "-t", "auto", "-e"]
 
-# Default: run script at the configured path (can be overridden)
-CMD ["/app/run_script.jl"]
+# Derived applications can override the commands
+CMD ["using RMECf; RMECf.run()"]
