@@ -12,11 +12,12 @@ COPY ./Project.toml /app/Project.toml
 COPY ./target_locations /app/target_locations
 
 # ReefModEngine.jl is not on Julia registry, requiring this step
-RUN julia --project=@app \
+RUN julia -t auto --project=. \
     -e 'using Pkg; Pkg.add(url="https://github.com/open-AIMS/ReefModEngine.jl", rev="main");'
 
 # Initialize Julia environment, install dependencies, and precompile
-RUN julia -t auto --project=. -e "using Pkg; Pkg.instantiate(); using RMECf; Pkg.precompile();"
+RUN julia -t auto --project=. \
+    -e "using Pkg; Pkg.instantiate(); using RMECf; Pkg.precompile();"
 
 # Copy entrypoint script
 COPY ./docker/docker-entrypoint.sh /usr/local/bin/
