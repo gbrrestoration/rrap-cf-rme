@@ -174,6 +174,9 @@ function run()
 	ReefModEngine.@RME reefSetAddFromIdList("iv_example"::Cstring, target_reef_ids::Ptr{Cstring}, length(target_reef_ids)::Cint)::Cint
 
 	# Deployments occur between 2025 2030
+	# For CF testing, 	
+	# Year 1: 1,000,000 outplants; Year 2: 5,000,000; Year 3: 10,1M; Year 4: 10,1M; Year 5: 10,1M and Year 6: 10,1M.
+	# Originally it is:
 	# Year 1: 100,000 outplants; Year 2: 500,000; Year 3: 1,1M; Year 4: 1,1M; Year 5: 1,1M and Year 6: 1,1M.
 	# set_outplant_deployment!("outplant_iv_2026", "iv_example", 100_000, 2026, target_reef_areas_km², d_density_m²)
 	# set_outplant_deployment!("outplant_iv_2027", "iv_example", 500_000, 2027, target_reef_areas_km², d_density_m²)
@@ -185,9 +188,9 @@ function run()
 	# most appropriate density to maintain the specified grid size (defaulting to 10x10).
 
 	@info "Configuring deployments"
-	set_outplant_deployment!("outplant_iv_2026", "iv_example", 100_000, 2026, target_reef_areas_km²)
-	set_outplant_deployment!("outplant_iv_2027", "iv_example", 500_000, 2027, target_reef_areas_km²)
-	set_outplant_deployment!("outplant_iv_2028_2030", "iv_example", Int64(1.1e6), 2028, 2030, 1, target_reef_areas_km²)
+	set_outplant_deployment!("outplant_iv_2026", "iv_example", 1_000_000, 2026, target_reef_areas_km², d_density_m²)
+	set_outplant_deployment!("outplant_iv_2027", "iv_example", 5_000_000, 2027, target_reef_areas_km², d_density_m²)
+	set_outplant_deployment!("outplant_iv_2028_2030", "iv_example", Int64(1.01e7), 2028, 2030, 1, target_reef_areas_km², d_density_m²)
 
 	# Initialize RME runs as defined above
 	@info "run_init()"
