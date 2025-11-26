@@ -55,7 +55,8 @@ function run()
 	use_fixed_seed = parse(Int, get(ENV, "USE_FIXED_SEED", "1"))
 	# Set the fixed seed value
 	fixed_seed = parse(Float64, get(ENV, "FIXED_SEED", "123.0"))
-	# Define coral outplanting density (per m²)
+	# TODO: get this working below
+    # Define coral outplanting density (per m²)
 	d_density_m² = parse(Float64, get(ENV, "D_DENSITY_M2", "6.8"))  # e.g., 1.0 coral per m²
 	# optional run ID. default to 0
 	run_id = get(ENV, "RUN_ID", "0")
@@ -73,21 +74,23 @@ function run()
 	# Number of repeats: number of random environmental sequences to run
 	reps = parse(Int, get(ENV, "REPS", nothing))
 
+    target_locations_base_path = get(ENV, "LOCATIONS_PATH", "./target_locations")
+
 	# Assert target locations set properly and then set path
 	if target_locations_mode == "FULL"
-		target_locations_path = "./target_locations/target_locations_full.csv"
+		target_locations_path = target_locations_base_path * "/target_locations_full.csv"
 	elseif target_locations_mode == "MEDIUM"
-		target_locations_path = "./target_locations/target_locations_medium.csv"
+		target_locations_path = target_locations_base_path * "/target_locations_medium.csv"
 	elseif target_locations_mode == "SMALL"
-		target_locations_path = "./target_locations/target_locations_small.csv"
+		target_locations_path = target_locations_base_path * "/target_locations_small.csv"
 	elseif target_locations_mode == "GBRMPA_GENERAL_MANAGEMENT_ZONES"
-		target_locations_path = "./target_locations/target_locations_gbrmpa_general_management_zones.csv"
+		target_locations_path = target_locations_base_path * "/target_locations_gbrmpa_general_management_zones.csv"
 	elseif target_locations_mode == "GBRMPA_PRESERVATION_ZONES"
-		target_locations_path = "./target_locations/target_locations_gbrmpa_preservation_zones.csv"
+		target_locations_path = target_locations_base_path * "target_locations_gbrmpa_preservation_zones.csv"
 	elseif target_locations_mode == "MOORE_REEF_CLUSTER"
-		target_locations_path = "./target_locations/target_locations_moore_reef_cluster.csv"
+		target_locations_path = target_locations_base_path * "/target_locations_moore_reef_cluster.csv"
 	elseif target_locations_mode == "NORTH_GBR"
-		target_locations_path = "./target_locations/target_locations_north_gbr.csv"
+		target_locations_path = target_locations_base_path * "/target_locations_north_gbr.csv"
 	else
 		error("TARGET environment variable set to invalid value. Please set it to one of: FULL, MEDIUM, SMALL, GBRMPA_GENERAL_MANAGEMENT_ZONES, GBRMPA_PRESERVATION_ZONES, MOORE_REEF_CLUSTER, NORTH_GBR.")
 	end
@@ -126,31 +129,37 @@ function run()
 	set_option("fixed_seed", fixed_seed)
 
 	# Load target intervention locations determined somehow (e.g., by ADRIA)
-	# The first column is simply the row number.
-	# The second column is a list of target reef ids matching the format as found in
+	# The first column is a list of target reef ids matching the format as found in
 	# the id list file (the file is found under `data_files/id` of the RME data set)
 	deploy_loc_details = CSV.read(
 		target_locations_path,
 		DataFrame,
-		header = ["index_id", "reef_id"],
-		types = Dict(1=>Int64, 2=>String),  # Force values to be interpreted as expected types
+		header = ["reef_id"],
+		types = Dict(1=>String),  # Force values to be interpreted as expected types
 	)
 
-	# Reef indices and IDs
-	target_reef_idx = deploy_loc_details.index_id
-	target_reef_ids = deploy_loc_details.reef_id
-	n_target_reefs = length(target_reef_idx)
+    # Reef indices and IDs
+    target_reef_ids = uppercase.(Vector(deploy_loc_details.reef_id))
 
-	# Get list of reef ids as specified by ReefMod Engine
-	reef_id_list = reef_ids()
+    # Get list of reef ids as specified by ReefMod Engine
+    reef_id_list = reef_ids()
 
-	n_reefs = length(reef_id_list)
+    # Filter to only reefs present in reef_id_list
+    valid_mask = target_reef_ids .∈ Ref(Set(reef_id_list))
+    mismatched_reefs = target_reef_ids[.!valid_mask]
 
-	# Get reef areas from RME
-	reef_area_km² = reef_areas()
+    # Warn if there are mismatched reefs
+    if !isempty(mismatched_reefs)
+        n_mismatched = length(mismatched_reefs)
+        n_total = length(target_reef_ids)
+        pct_mismatched = round(100 * n_mismatched / n_total, digits=1)
+        @warn "$(n_mismatched)/$(n_total) reef IDs ($(pct_mismatched)%) are not in the ReefMod Engine dataset and will be excluded: $(mismatched_reefs)"
+    end
 
-	# Get list of areas for the target reefs
-	target_reef_areas_km² = reef_areas(target_reef_ids)
+    # Filter both indices and IDs to only valid reefs
+    target_reef_ids = target_reef_ids[valid_mask]
+
+    target_reef_areas_km² = reef_areas(target_reef_ids)
 
 	# Initialize result store
 	result_store = ResultStore(start_year, end_year)
@@ -188,9 +197,16 @@ function run()
 	# most appropriate density to maintain the specified grid size (defaulting to 10x10).
 
 	@info "Configuring deployments"
-	set_outplant_deployment!("outplant_iv_2026", "iv_example", 1_000_000, 2026, target_reef_areas_km², d_density_m²)
-	set_outplant_deployment!("outplant_iv_2027", "iv_example", 5_000_000, 2027, target_reef_areas_km², d_density_m²)
-	set_outplant_deployment!("outplant_iv_2028_2030", "iv_example", Int64(1.01e7), 2028, 2030, 1, target_reef_areas_km², d_density_m²)
+    # Currently, the density doesn't work - not sure if data type is incorrect -
+    # we need to provide very large outplanting magnitudes to hit a target
+    # density
+	set_outplant_deployment!("outplant_iv_2026", "iv_example", 100_000_000, 2026, target_reef_areas_km²)
+	set_outplant_deployment!("outplant_iv_2027", "iv_example", 500_000_000, 2027, target_reef_areas_km²)
+	set_outplant_deployment!("outplant_iv_2028_2030", "iv_example", 1_000_000_000, 2028, 2030, 1, target_reef_areas_km²)
+
+	#set_outplant_deployment!("outplant_iv_2026", "iv_example", 1_000_000, 2026, target_reef_areas_km², d_density_m²)
+	#set_outplant_deployment!("outplant_iv_2027", "iv_example", 5_000_000, 2027, target_reef_areas_km², d_density_m²)
+	#set_outplant_deployment!("outplant_iv_2028_2030", "iv_example", Int64(1.01e7), 2028, 2030, 1, target_reef_areas_km², d_density_m²)
 
 	# Initialize RME runs as defined above
 	@info "run_init()"
@@ -207,6 +223,7 @@ function run()
     dir = joinpath(outputs_path, run_id)
     @info "Saving results to" dir
 	save_result_store(dir, result_store)
+
     # Uploading to S3
     @info "Uploading results to S3 at" dir s3_storage_path
     upload_directory(storage_client, dir, s3_storage_path)
