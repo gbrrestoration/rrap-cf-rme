@@ -23,14 +23,15 @@ docs/site/
 # environment.
 # Manifest.toml - removing ignore for this as we are building application now / good to have.
 
-sandbox/
+sandbox/*
+!sandbox/init.sh
+!sandbox/start.sh
 
 .vscode/
 
 docs/node_modules/
 
 docs/package-lock.json
-sandbox
 rme
 example_outs
 outputs
